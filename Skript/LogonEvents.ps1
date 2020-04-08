@@ -24,8 +24,11 @@
 [cmdletBinding()]
 Param(
 [Parameter(Mandatory=$true)]
+[ValidateScript({Test-Connection -ComputerName $PSItem -Count 2 -Quiet})]
 [string]$ComputerName,
+[ValidateSet(4624,4625,4634)]
 [int]$EventId = 4624,
+[ValidateRange(5,20)]
 [int]$Newest = 5,
 [switch]$Detailed
 )
