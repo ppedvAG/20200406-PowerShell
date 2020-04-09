@@ -135,3 +135,53 @@ else
 
 
 }
+
+function Install-KursModul
+{
+[cmdletBinding()]
+Param(
+    
+    [Parameter(Mandatory=$true)]
+    [ValidateScript({Test-Path -Path $PSItem -PathType Leaf})]
+    [string]$Modulefilepath,
+
+    [ValidateScript({Test-Path -Path $PSItem -IsValid})]
+    [string]$TargetPath = "NoPath",
+
+    [switch]$Force
+)
+    $SourceModuleFile = Get-Item -Path $Modulefilepath
+
+    if($TargetPath -eq "NoPath")
+    {
+        $TargetPath = $env:PSModulePath.Split(';')[0] + "\" + $SourceModuleFile.BaseName
+        Write-Verbose -Message $TargetPath
+    }
+
+    if(Test-Path -Path $TargetPath -PathType Container)
+    {
+        if($Force)
+        {
+            foreach($Content in (Get-ChildItem -Path $TargetPath))
+            {
+                Remove-Item -Path $Content.FullName -Recurse
+            }
+        }
+        else
+        {
+            Write-Error -Message "Datei ist bereits vorhanden" -ErrorAction Stop
+        }
+    }
+    else
+    {
+        New-Item -Path $TargetPath -ItemType Directory
+    }
+        
+    $Sourcepsdpath = $SourceModuleFile.DirectoryName + "\" + $SourceModuleFile.BaseName + ".psd1"
+    if(Test-Path -Path $Sourcepsdpath)
+    {
+        Copy-Item -Path $Sourcepsdpath -Destination ($TargetPath + "\" + $SourceModuleFile.BaseName + ".psd1")
+    }
+
+    $SourceModuleFile.CopyTo(($TargetPath + "\" + $SourceModuleFile.Name))
+}
