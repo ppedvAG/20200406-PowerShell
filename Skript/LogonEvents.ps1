@@ -26,11 +26,17 @@ Param(
 [Parameter(Mandatory=$true)]
 [ValidateScript({Test-Connection -ComputerName $PSItem -Count 2 -Quiet})]
 [string]$ComputerName,
+
 [ValidateSet(4624,4625,4634)]
 [int]$EventId = 4624,
+
 [ValidateRange(5,20)]
 [int]$Newest = 5,
-[switch]$Detailed
+
+[switch]$Detailed,
+
+[ValidateSet("Blau","Grün")]
+[string]$AusgabeFarbe = "leer"
 )
 
 Write-Verbose -Message "Vor Abfrage es wurden folgende Werte verwendet:
@@ -48,5 +54,18 @@ If($Detailed -eq $true)
 }
 else
 {
-    $Ergebnis
+    if($AusgabeFarbe -eq "leer")
+    {
+        $Ergebnis
+    }
+    else
+    {
+        Write-Debug -Message "Vor SwitchCase Color"
+        switch($AusgabeFarbe)
+        {
+            "Blau" {Write-Host ($Ergebnis | Out-String) -ForegroundColor Blue -BackgroundColor White}
+            "Grün" {Write-Host ($Ergebnis | Out-String) -ForegroundColor Green}
+        }
+    }
 }
+
